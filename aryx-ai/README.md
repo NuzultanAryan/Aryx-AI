@@ -111,9 +111,9 @@ aryx-ai/
 
 ## 5. Cara Instalasi
 
-1. Clone atau buka folder proyek `nova-ai`:
+1. Clone atau buka folder proyek `aryx-ai`:
    ```bash
-   cd nova-ai
+   cd aryx-ai
    ```
 
 2. Pasang semua dependensi (root, server, dan client):

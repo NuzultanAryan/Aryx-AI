@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "cd nova-ai && npm run dev",
-    "start": "cd nova-ai && npm start",
-    "test": "cd nova-ai && npm test",
-    "build": "cd nova-ai && npm run build"
+    "dev": "cd aryx-ai && npm run dev",
+    "start": "cd aryx-ai && npm start",
+    "test": "cd aryx-ai && npm test",
+    "build": "cd aryx-ai && npm run build"
   }
 }
