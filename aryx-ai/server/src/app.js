@@ -2,14 +2,20 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 import config from './config/index.js';
 import apiRoutes from './routes/api.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
 
 const app = express();
 
 // Security headers
 app.use(helmet({
-  contentSecurityPolicy: false, // Allow frontend to load freely during development
+  contentSecurityPolicy: false,
 }));
 
 // CORS
@@ -44,7 +50,23 @@ app.use('/api', generalLimiter);
 // API Routes
 app.use('/api', apiRoutes);
 
-// 404 handler
+// Serve static frontend assets in production if built
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
+// 404 handler for API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Endpoint API tidak ditemukan.' });
+});
+
+// 404 fallback
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found.' });
 });
