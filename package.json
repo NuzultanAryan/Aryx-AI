@@ -1,0 +1,11 @@
+{
+  "name": "project-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd nova-ai && npm run dev",
+    "start": "cd nova-ai && npm start",
+    "test": "cd nova-ai && npm test",
+    "build": "cd nova-ai && npm run build"
+  }
+}

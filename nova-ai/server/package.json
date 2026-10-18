@@ -1,0 +1,22 @@
+{
+  "name": "aryx-ai-server",
+  "version": "1.0.0",
+  "description": "Aryx AI Backend Server",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test test/**/*.test.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "openai": "^4.70.0",
+    "uuid": "^10.0.0"
+  }
+}
