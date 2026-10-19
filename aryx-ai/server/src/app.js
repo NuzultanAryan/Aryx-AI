@@ -18,9 +18,25 @@ app.use(helmet({
   contentSecurityPolicy: false,
 }));
 
-// CORS
+// CORS — support multiple origins (comma-separated in FRONTEND_ORIGIN)
+const allowedOrigins = (config.frontendOrigin || 'http://localhost:5173')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: config.frontendOrigin,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, Render health checks)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    // Also allow *.onrender.com subdomains automatically
+    if (/\.onrender\.com$/.test(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type'],
 }));

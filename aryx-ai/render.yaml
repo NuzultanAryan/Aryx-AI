@@ -1,0 +1,33 @@
+﻿services:
+  - type: web
+    name: aryx-ai
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: .
+    buildCommand: npm run build:render
+    startCommand: node server/src/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: AI_PROVIDER
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: SYSTEM_PROMPT
+        sync: false
+      - key: MAX_CONTEXT_MESSAGES
+        value: "20"
+      - key: MAX_MESSAGE_LENGTH
+        value: "10000"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "20"
