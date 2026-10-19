@@ -26,13 +26,13 @@ const allowedOrigins = (config.frontendOrigin || 'http://localhost:5173')
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, curl, Render health checks)
+    // Allow requests with no origin (e.g. mobile apps, curl, health checks)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
       return callback(null, true);
     }
-    // Also allow *.onrender.com subdomains automatically
-    if (/\.onrender\.com$/.test(origin)) {
+    // Auto-allow Render and Koyeb subdomains
+    if (/\.onrender\.com$/.test(origin) || /\.koyeb\.app$/.test(origin)) {
       return callback(null, true);
     }
     callback(new Error('Not allowed by CORS'));

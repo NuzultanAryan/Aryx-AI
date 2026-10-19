@@ -9,6 +9,7 @@
     "dev:server": "cd server && npm run dev",
     "build": "cd client && npm run build",
     "build:render": "cd client && npm install && npm run build && cd ../server && npm install",
+    "build:production": "cd client && npm install --legacy-peer-deps && npm run build && cd ../server && npm install",
     "start": "cd server && npm start",
     "test": "cd server && npm test",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install"
