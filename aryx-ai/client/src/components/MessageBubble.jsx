@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Copy, Check, RotateCcw, ThumbsUp, ThumbsDown, User, Sparkles } from 'lucide-react';
+import { Copy, Check, RotateCcw, ThumbsUp, ThumbsDown, User, Sparkles, Zap } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 
 export default function MessageBubble({ message, onRegenerate, isLastAssistant, isStreaming }) {
@@ -48,41 +48,57 @@ export default function MessageBubble({ message, onRegenerate, isLastAssistant, 
           )}
         </div>
         {!isUser && !isStreaming && message.content && (
-          <div className={`message-actions ${isLastAssistant ? 'visible' : ''}`}>
-            <button
-              className={`message-action-btn ${copied ? 'active' : ''}`}
-              onClick={handleCopy}
-              aria-label="Salin jawaban"
-              title="Salin"
-            >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-            </button>
-            {onRegenerate && (
+          <div className={`message-footer ${isLastAssistant ? 'visible' : ''}`}>
+            <div className="message-actions">
               <button
-                className="message-action-btn"
-                onClick={onRegenerate}
-                aria-label="Buat ulang jawaban"
-                title="Buat ulang"
+                className={`message-action-btn ${copied ? 'active' : ''}`}
+                onClick={handleCopy}
+                aria-label="Salin jawaban"
+                title="Salin"
               >
-                <RotateCcw size={14} />
+                {copied ? <Check size={14} /> : <Copy size={14} />}
               </button>
+              {onRegenerate && (
+                <button
+                  className="message-action-btn"
+                  onClick={onRegenerate}
+                  aria-label="Buat ulang jawaban"
+                  title="Buat ulang"
+                >
+                  <RotateCcw size={14} />
+                </button>
+              )}
+              <button
+                className={`message-action-btn ${liked === 'up' ? 'active' : ''}`}
+                onClick={() => setLiked(prev => prev === 'up' ? null : 'up')}
+                aria-label="Suka"
+                title="Suka"
+              >
+                <ThumbsUp size={14} />
+              </button>
+              <button
+                className={`message-action-btn ${liked === 'down' ? 'active' : ''}`}
+                onClick={() => setLiked(prev => prev === 'down' ? null : 'down')}
+                aria-label="Tidak suka"
+                title="Tidak suka"
+              >
+                <ThumbsDown size={14} />
+              </button>
+            </div>
+
+            {message.stats && (
+              <div 
+                className="message-stats-badge" 
+                title={`Respon pertama (TTFT): ${message.stats.ttftSec || (message.stats.ttftMs / 1000).toFixed(2)}s | Total durasi: ${message.stats.durationSec}s`}
+              >
+                <Zap size={11} className="message-stats-icon" />
+                <span>{message.stats.durationSec}s</span>
+                <span className="stats-separator">•</span>
+                <span>{message.stats.tokensPerSec} t/s</span>
+                <span className="stats-separator">•</span>
+                <span>~{message.stats.estimatedTokens} tokens</span>
+              </div>
             )}
-            <button
-              className={`message-action-btn ${liked === 'up' ? 'active' : ''}`}
-              onClick={() => setLiked(prev => prev === 'up' ? null : 'up')}
-              aria-label="Suka"
-              title="Suka"
-            >
-              <ThumbsUp size={14} />
-            </button>
-            <button
-              className={`message-action-btn ${liked === 'down' ? 'active' : ''}`}
-              onClick={() => setLiked(prev => prev === 'down' ? null : 'down')}
-              aria-label="Tidak suka"
-              title="Tidak suka"
-            >
-              <ThumbsDown size={14} />
-            </button>
           </div>
         )}
       </div>

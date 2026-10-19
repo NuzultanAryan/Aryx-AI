@@ -800,18 +800,57 @@ input, textarea {
   overflow-x: auto;
 }
 
-/* Message actions */
+/* Message actions & performance stats */
+.message-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
 .message-actions {
   display: flex;
   gap: 4px;
-  margin-top: 10px;
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
 
 .message:hover .message-actions,
-.message-actions.visible {
+.message-actions.visible,
+.message-footer.visible .message-actions {
   opacity: 1;
+}
+
+.message-stats-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  user-select: none;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.message-stats-badge:hover {
+  border-color: var(--accent-secondary);
+  color: var(--text-secondary);
+  background: var(--accent-secondary-light);
+}
+
+.message-stats-icon {
+  color: var(--accent-secondary);
+  flex-shrink: 0;
+}
+
+.stats-separator {
+  opacity: 0.35;
+  font-size: 9px;
 }
 
 .message-action-btn {

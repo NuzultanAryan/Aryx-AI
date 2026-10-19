@@ -32,6 +32,7 @@ function initializeSchema() {
       conversation_id TEXT NOT NULL,
       role TEXT NOT NULL CHECK(role IN ('user', 'assistant', 'system')),
       content TEXT NOT NULL,
+      stats TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
     );
@@ -43,6 +44,13 @@ function initializeSchema() {
     CREATE INDEX IF NOT EXISTS idx_conversations_updated_at 
       ON conversations(updated_at);
   `);
+
+  // Safe migration for existing databases
+  try {
+    db.exec('ALTER TABLE messages ADD COLUMN stats TEXT;');
+  } catch {
+    // Column already exists, safe to ignore
+  }
 }
 
 export function closeDb() {

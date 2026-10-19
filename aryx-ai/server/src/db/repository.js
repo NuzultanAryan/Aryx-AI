@@ -58,41 +58,59 @@ export function deleteAllConversations() {
   return result.changes;
 }
 
-export function addMessage(conversationId, role, content) {
+export function addMessage(conversationId, role, content, stats = null) {
   const db = getDb();
   const id = uuidv4();
   const now = new Date().toISOString();
+  const statsJson = stats ? JSON.stringify(stats) : null;
   const stmt = db.prepare(
-    'INSERT INTO messages (id, conversation_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO messages (id, conversation_id, role, content, stats, created_at) VALUES (?, ?, ?, ?, ?, ?)'
   );
-  stmt.run(id, conversationId, role, content, now);
+  stmt.run(id, conversationId, role, content, statsJson, now);
   touchConversation(conversationId);
-  return { id, conversation_id: conversationId, role, content, created_at: now };
+  return { id, conversation_id: conversationId, role, content, stats, created_at: now };
 }
 
 export function getMessagesByConversationId(conversationId, limit) {
   const db = getDb();
-  if (limit) {
-    return db.prepare(
-      'SELECT id, conversation_id, role, content, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC LIMIT ?'
-    ).all(conversationId, limit);
-  }
-  return db.prepare(
-    'SELECT id, conversation_id, role, content, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC'
-  ).all(conversationId);
+  const query = limit
+    ? 'SELECT id, conversation_id, role, content, stats, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, rowid ASC LIMIT ?'
+    : 'SELECT id, conversation_id, role, content, stats, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC, rowid ASC';
+  const rows = limit ? db.prepare(query).all(conversationId, limit) : db.prepare(query).all(conversationId);
+  return rows.map(r => {
+    let parsedStats = null;
+    if (r.stats) {
+      try {
+        parsedStats = typeof r.stats === 'string' ? JSON.parse(r.stats) : r.stats;
+      } catch {
+        parsedStats = null;
+      }
+    }
+    return { ...r, stats: parsedStats };
+  });
 }
 
 export function getRecentMessages(conversationId, limit) {
   const db = getDb();
-  // Get last N messages ordered ascending for context
+  // Get last N messages ordered ascending for context with rowid tiebreaker
   const rows = db.prepare(
-    `SELECT id, conversation_id, role, content, created_at 
+    `SELECT id, conversation_id, role, content, stats, created_at 
      FROM messages 
      WHERE conversation_id = ? 
-     ORDER BY created_at DESC 
+     ORDER BY created_at DESC, rowid DESC 
      LIMIT ?`
   ).all(conversationId, limit);
-  return rows.reverse();
+  return rows.reverse().map(r => {
+    let parsedStats = null;
+    if (r.stats) {
+      try {
+        parsedStats = typeof r.stats === 'string' ? JSON.parse(r.stats) : r.stats;
+      } catch {
+        parsedStats = null;
+      }
+    }
+    return { ...r, stats: parsedStats };
+  });
 }
 
 export function searchConversations(query) {

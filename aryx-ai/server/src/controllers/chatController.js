@@ -70,17 +70,44 @@ export async function handleChat(req, res) {
     // Send user message id
     res.write(`data: ${JSON.stringify({ type: 'user_message', data: userMessage })}\n\n`);
 
+    // Performance tracking
+    const startTime = Date.now();
+    let firstTokenTime = null;
+    let chunkCount = 0;
+
     // Stream AI response
     const selectedModel = typeof model === 'string' && model.trim() ? model.trim() : null;
     for await (const chunk of provider.chatStream(contextMessages, systemPrompt, abortController.signal, selectedModel)) {
       if (aborted) break;
+      if (!firstTokenTime) {
+        firstTokenTime = Date.now();
+      }
+      chunkCount++;
       fullResponse += chunk;
       res.write(`data: ${JSON.stringify({ type: 'chunk', data: chunk })}\n\n`);
     }
 
     if (!aborted && fullResponse.length > 0) {
-      // Save assistant message
-      const assistantMessage = repo.addMessage(conversationId, 'assistant', fullResponse);
+      const endTime = Date.now();
+      const totalDurationMs = Math.max(50, endTime - startTime);
+      const ttftMs = firstTokenTime ? Math.max(10, firstTokenTime - startTime) : totalDurationMs;
+      
+      // Calculate token estimates (~3.8 characters per token)
+      const estimatedTokens = Math.max(1, Math.round(fullResponse.length / 3.8));
+      const generationDurationSec = Math.max(0.1, totalDurationMs / 1000);
+      const tokensPerSec = Math.round((estimatedTokens / generationDurationSec) * 10) / 10;
+      
+      const stats = {
+        totalDurationMs,
+        durationSec: (totalDurationMs / 1000).toFixed(2),
+        ttftMs,
+        ttftSec: (ttftMs / 1000).toFixed(2),
+        estimatedTokens,
+        tokensPerSec,
+      };
+
+      // Save assistant message with performance stats
+      const assistantMessage = repo.addMessage(conversationId, 'assistant', fullResponse, stats);
       res.write(`data: ${JSON.stringify({ type: 'done', data: assistantMessage })}\n\n`);
       
       // Auto-generate title if this is the first exchange
